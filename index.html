@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTuber Clicker - A Weird News TV Game</title>
+    <style>
+        /* Global Reset & Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background: #0f0813;
+            background: radial-gradient(circle at center, #18091e 0%, #09040b 100%);
+            color: #f5f5fa;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Three Column Layout */
+        .column {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 40px 30px;
+            box-sizing: border-box;
+        }
+        
+        #left-col {
+            flex: 1.1;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 80px;
+        }
+
+        #mid-col {
+            flex: 0.9;
+            border-left: 1px solid rgba(255, 255, 255, 0.04);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        #right-col {
+            flex: 1.2;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Live Studio Badge */
+        .live-badge {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            background: linear-gradient(90deg, #ff0055, #ff4500);
+            color: #fff;
+            padding: 5px 14px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+        }
+
+        /* Boost Timer Badge */
+        #boost-timer-badge {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            background: linear-gradient(90deg, #ffd700, #ffa500);
+            color: #000;
+            padding: 5px 14px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            display: none;
+        }
+
+        /* Editable Channel Name Layout */
+        .channel-name-container {
+            text-align: center;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #channel-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ff3366;
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed rgba(255, 51, 102, 0.4);
+            padding: 2px 6px;
+            text-align: center;
+            outline: none;
+            max-width: 200px;
+        }
+
+        #channel-name:focus {
+            border-bottom-style: solid;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+        }
+
+        /* Counters */
+        #sub-counter {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            text-align: center;
+        }
+
+        #subs-per-second {
+            font-size: 0.95rem;
+            color: #a0a0ba;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 18px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 60px;
+        }
+
+        /* 3D Rounded Play Button */
+        #main-button-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #main-button {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #e61c3b 0%, #aa0922 100%);
+            border-radius: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 
+                0 30px 60px rgba(230, 28, 59, 0.25),
+                0 0 40px rgba(230, 28, 59, 0.2),
+                inset 0 4px 12px rgba(255, 255, 255, 0.35);
+            transition: transform 0.05s ease, box-shadow 0.2s;
+        }
+
+        #main-button:hover {
+            transform: scale(1.03);
+            box-shadow: 
+                0 35px 70px rgba(230, 28, 59, 0.35),
+                0 0 50px rgba(230, 28, 59, 0.3),
+                inset 0 4px 12px rgba(255, 255, 255, 0.45);
+        }
+
+        #main-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 15px 30px rgba(230, 28, 59, 0.4);
+        }
+
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-top: 26px solid transparent;
+            border-left: 46px solid #ffffff;
+            border-bottom: 26px solid transparent;
+            margin-left: 12px;
+            border-radius: 4px;
+        }
+
+        /* Golden Pop-up Mini Clicker Upgrade */
+        #mini-pop-clicker {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            border-radius: 18px;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(255, 165, 0, 0.5), inset 0 2px 6px #fff;
+            z-index: 500;
+            animation: bouncePop 0.6s infinite alternate;
+        }
+
+        .mini-play-icon {
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-left: 14px solid #ffffff;
+            border-bottom: 8px solid transparent;
+            margin-left: 3px;
+        }
+
+        /* Floating +1 / Golden Boost Text Effect */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            color: #ff3366;
+            font-weight: 700;
+            font-size: 1.5rem;
+            animation: floatUp 0.7s ease-out forwards;
+            z-index: 100;
+        }
+
+        /* Headers */
+        .panel-header {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Analytics Sidebar Cards */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 22px 24px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #75758a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        #stat-rank {
+            color: #3ea6ff;
+        }
+
+        /* Sleek Save Button */
+        .save-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 16px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: auto;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .save-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Shop Rows */
+        .shop-container {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+        }
+
+        .shop-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .shop-item:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .shop-item.disabled {
+            opacity: 0.18;
+            cursor: not-allowed;
+        }
+
+        .item-icon {
+            font-size: 1.8rem;
+            margin-right: 18px;
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .item-cost {
+            color: #38dc7a;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .shop-item.disabled .item-cost {
+            color: #a0a0ba;
+        }
+
+        .item-count {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.04);
+            padding-left: 15px;
+        }
+
+        .shop-item:not(.disabled) .item-count {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-70px) scale(1.1); opacity: 0; }
+        }
+
+        @keyframes bouncePop {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mini-pop-clicker" onclick="handleMiniClick(event)">
+        <div class="mini-play-icon"></div>
+    </div>
+
+    <div class="column" id="left-col">
+        <div class="live-badge">LIVE STUDIO</div>
+        <div id="boost-timer-badge">BOOST: 30s</div>
+        <div class="channel-name-container">
+            📝 <input type="text" id="channel-name" value="Newbie Channel" oninput="checkChannelHack()">
+        </div>
+        <div id="sub-counter">0 Subscribers</div>
+        <div id="subs-per-second">per second: 0.0</div>
+        
+        <div id="main-button-container">
+            <div id="main-button" onclick="handleButtonClick(event)">
+                <div class="play-icon"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="column" id="mid-col">
+        <div class="panel-header">📈 Creator Analytics</div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Channel Status Tier</div>
+            <div class="stat-value" id="stat-rank">Newbie Vlogger</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Raw Production Clicks</div>
+            <div class="stat-value" id="stat-clicks">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">All-Time Audience Pool</div>
+            <div class="stat-value" id="stat-total-subs">0</div>
+        </div>
+
+        <button class="save-btn" onclick="saveGame()">💾 Save Progress</button>
+    </div>
+
+    <div class="column" id="right-col">
+        <div class="panel-header">🛒 Assets & Gear Upgrade</div>
+        <div class="shop-container" id="shop-container"></div>
+    </div>
+
+    <script>
+        // Core Game Engine State
+        let state = {
+            subs: 0,
+            totalSubsEarned: 0,
+            clicks: 0,
+            sps: 0,
+            channelName: "Newbie Channel"
+        };
+
+        // Multipliers for temporary golden boosts
+        let boostMultiplier = 1;
+        let boostRemainingSeconds = 0;
+        let boostIntervalTimer = null;
+
+        // Expanded Items Array
+        const items = [
+            { id: 'clicker', name: 'Engagement Bot', cost: 15, baseCost: 15, sps: 1, count: 0, icon: '🤖' },
+            { id: 'microphone', name: 'Condenser Mic Upgrade', cost: 100, baseCost: 100, sps: 1, count: 0, icon: '🎙️' },
+            { id: 'lighting', name: 'RGB Studio Key Light', cost: 500, baseCost: 500, sps: 4, count: 0, icon: '💡' },
+            { id: 'editor', name: 'Hired Professional Editor', cost: 1100, baseCost: 1100, sps: 8, count: 0, icon: '🎬' },
+            { id: 'collab', name: 'A-List Streamer Collab', cost: 12000, baseCost: 12000, sps: 47, count: 0, icon: '👥' },
+            { id: 'studio', name: 'Penthouse Media Hub', cost: 130000, baseCost: 130000, sps: 260, count: 0, icon: '🏢' },
+            { id: 'algorithm', name: 'Core Algorithm Override', cost: 1400000, baseCost: 1400000, sps: 1400, count: 0, icon: '⚡' },
+            // New High-Tier Upgrades
+            { id: 'deepfake', name: 'AI Deepfake Fleet', cost: 15000000, baseCost: 15000000, sps: 8500, count: 0, icon: '👥' },
+            { id: 'satellite', name: 'Satellite Broadcast Network', cost: 250000000, baseCost: 250000000, sps: 65000, count: 0, icon: '🛰️' },
+            { id: 'simulation', name: 'Galactic Simulation Farm', cost: 5000000000, baseCost: 5000000000, sps: 500000, count: 0, icon: '🌌' }
+        ];
+
+        const shopContainer = document.getElementById('shop-container');
+        
+        function initShop() {
+            shopContainer.innerHTML = '';
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'shop-item disabled';
+                itemDiv.id = `item-${item.id}`;
+                itemDiv.onclick = () => buyItem(index);
+                
+                itemDiv.innerHTML = `
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-details">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-cost"><span id="cost-${item.id}">${item.cost}</span> subs</div>
+                    </div>
+                    <div class="item-count" id="count-${item.id}">0</div>
+                `;
+                shopContainer.appendChild(itemDiv);
+            });
+        }
+
+        function handleButtonClick(event) {
+            let clickGain = 1 * boostMultiplier;
+            state.subs += clickGain;
+            state.totalSubsEarned += clickGain;
+            state.clicks += 1;
+            
+            spawnParticle(event, `+${clickGain}`);
+            updateDisplay();
+        }
+
+        function spawnParticle(event, text) {
+            const container = document.body;
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.innerText = text;
+            
+            if (boostMultiplier > 1) {
+                particle.style.color = '#ffd700';
+                particle.style.textShadow = '0 0 8px #ffa500';
+            }
+            
+            particle.style.left = `${event.clientX}px`;
+            particle.style.top = `${event.clientY}px`;
+            
+            container.appendChild(particle);
+            setTimeout(() => { particle.remove(); }, 700);
+        }
+
+        /* 5-Minute Intermittent Mini Pop-up Engine */
+        function triggerMiniClicker() {
+            const mini = document.getElementById('mini-pop-clicker');
+            
+            const randomX = Math.floor(Math.random() * (window.innerWidth - 100)) + 20;
+            const randomY = Math.floor(Math.random() * (window.innerHeight - 100)) + 20;
+            
+            mini.style.left = `${randomX}px`;
+            mini.style.top = `${randomY}px`;
+            mini.style.display = 'flex';
+            
+            // Hide pop-up automatically after 15 seconds if missed
+            setTimeout(() => {
+                mini.style.display = 'none';
+            }, 15000);
+        }
+
+        function handleMiniClick(event) {
+            event.stopPropagation();
+            document.getElementById('mini-pop-clicker').style.display = 'none';
+            
+            // Generate a random multiplier duration between 30 and 60 seconds
+            boostRemainingSeconds = Math.floor(Math.random() * 31) + 30;
+            boostMultiplier = 7;
+            
+            calculateSPS();
+            updateDisplay();
+            
+            const badge = document.getElementById('boost-timer-badge');
+            badge.innerText = `BOOST: ${boostRemainingSeconds}s`;
+            badge.style.display = 'block';
+            
+            spawnParticle(event, `🚀 7X BOOST ACTIVE (${boostRemainingSeconds}s)!`);
+            
+            clearInterval(boostIntervalTimer);
+            boostIntervalTimer = setInterval(() => {
+                boostRemainingSeconds--;
+                if (boostRemainingSeconds <= 0) {
+                    clearInterval(boostIntervalTimer);
+                    boostMultiplier = 1;
+                    badge.style.display = 'none';
+                } else {
+                    badge.innerText = `BOOST: ${boostRemainingSeconds}s`;
+                }
+                calculateSPS();
+                updateDisplay();
+            }, 1000);
+        }
+
+        /* Secret Code Hack Detection Engine */
+        function checkChannelHack() {
+            const inputField = document.getElementById('channel-name');
+            state.channelName = inputField.value;
+            
+            if (state.channelName === "Weird News TV") {
+                state.subs += 50000000;
+                state.totalSubsEarned += 50000000;
+                inputField.style.color = '#00ff66';
+                inputField.style.fontWeight = '900';
+                updateDisplay();
+            } else {
+                inputField.style.color = '#ff3366';
+                inputField.style.fontWeight = '600';
+            }
+        }
+
+        function buyItem(index) {
+            let item = items[index];
+            if (state.subs >= item.cost) {
+                state.subs -= item.cost;
+                item.count++;
+                item.cost = Math.floor(item.baseCost * Math.pow(1.15, item.count));
+                
+                calculateSPS();
+                updateDisplay();
+            }
+        }
+
+        function calculateSPS() {
+            let totalSPS = 0;
+            items.forEach(item => { totalSPS += item.count * item.sps; });
+            state.sps = totalSPS * boostMultiplier;
+        }
+
+        // Expanded Ranks System
+        function getRank(totalSubs) {
+            if (totalSubs < 100) return 'Newbie Vlogger';
+            if (totalSubs < 1000) return 'Micro-Influencer';
+            if (totalSubs < 10000) return 'Verified Creator';
+            if (totalSubs < 100000) return 'Silver Play Button';
+            if (totalSubs < 1000000) return 'Gold Play Button Star';
+            if (totalSubs < 10000000) return 'Diamond Play Diamond Holder';
+            if (totalSubs < 50000000) return 'Algorithm Overlord';
+            if (totalSubs < 200000000) return 'Global Phenomenon';
+            if (totalSubs < 1000000000) return 'Planetary Trendsetter';
+            if (totalSubs < 5000000000) return 'Multiverse Network Controller';
+            return 'Sentient Stream Simulator';
+        }
+
+        function updateDisplay() {
+            document.getElementById('sub-counter').innerText = `${Math.floor(state.subs).toLocaleString()} Subscribers`;
+            document.getElementById('subs-per-second').innerText = `per second: ${state.sps.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})}`;
+            
+            document.getElementById('stat-clicks').innerText = state.clicks.toLocaleString();
+            document.getElementById('stat-total-subs').innerText = Math.floor(state.totalSubsEarned).toLocaleString();
+            document.getElementById('stat-rank').innerText = getRank(state.totalSubsEarned);
+            
+            items.forEach(item => {
+                const itemDiv = document.getElementById(`item-${item.id}`);
+                const costSpan = document.getElementById(`cost-${item.id}`);
+                const countSpan = document.getElementById(`count-${item.id}`);
+                
+                if (itemDiv && costSpan && countSpan) {
+                    costSpan.innerText = Math.floor(item.cost).toLocaleString();
+                    countSpan.innerText = item.count;
+                    
+                    if (state.subs >= item.cost) {
+                        itemDiv.classList.remove('disabled');
+                    } else {
+                        itemDiv.classList.add('disabled');
+                    }
+                }
+            });
+        }
+
+        // Save Functionality
+        function saveGame() {
+            const saveData = {
+                state: state,
+                itemCounts: items.map(item => item.count)
+            };
+            localStorage.setItem('youtuberClickerSaveV3', JSON.stringify(saveData));
+            
+            const saveBtn = document.querySelector('.save-btn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '✅ Progress Saved!';
+            setTimeout(() => { saveBtn.innerHTML = originalText; }, 1500);
+        }
+
+        // Load Functionality
+        function loadGame() {
+            const saved = localStorage.getItem('youtuberClickerSaveV3');
+            if (saved) {
+                try {
+                    const saveData = JSON.parse(saved);
+                    state = saveData.state;
+                    
+                    document.getElementById('channel-name').value = state.channelName || "Newbie Channel";
+                    
+                    saveData.itemCounts.forEach((count, index) => {
+                        if(items[index]) {
+                            items[index].count = count;
+                            items[index].cost = Math.floor(items[index].baseCost * Math.pow(1.15, count));
+                        }
+                    });
+                    
+                    calculateSPS();
+                } catch(e) {
+                    console.error("Save load processing error.");
+                }
+            }
+        }
+
+        // Tick Interval Loops
+        setInterval(() => {
+            if (state.sps > 0) {
+                let gains = state.sps / 10;
+                state.subs += gains;
+                state.totalSubsEarned += gains;
+            }
+            updateDisplay();
+        }, 100);
+
+        // Configured for 5 Minutes (300,000 Milliseconds)
+        setInterval(triggerMiniClicker, 300000);
+
+        window.onload = function() {
+            initShop();
+            loadGame();
+            updateDisplay();
+        };
+    </script>
+</body>
+</html>
